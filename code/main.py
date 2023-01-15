@@ -1,5 +1,5 @@
 import pygame, sys
-from settings import FPS, WIDTH, HEIGTH
+from settings import FPS, WIDTH, HEIGHT
 from level import Level
 
 class Game:
@@ -7,7 +7,7 @@ class Game:
 		  
 		# general setup
 		pygame.init()
-		self.screen = pygame.display.set_mode((WIDTH,HEIGTH))
+		self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
 		pygame.display.set_caption('Zelda - A Link to the PYst')
 		self.clock = pygame.time.Clock()
 
@@ -23,6 +23,7 @@ class Game:
 			self.screen.fill('black')
 			self.level.run()
 			pygame.display.update()
+			
 			self.clock.tick(FPS)
 
 if __name__ == '__main__':
