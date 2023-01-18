@@ -12,6 +12,7 @@ class Level():
         self.visible_sprites = pygame.sprite.Group()
         self.obstacle_sprites = pygame.sprite.Group()
 
+        self.player = None
         self.setup_grid()
 
     def setup_grid(self):
@@ -23,11 +24,15 @@ class Level():
                     if cell == 'x':
                         Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
                     if cell == 'p':
-                        Player((x_pos, y_pos), self.visible_sprites)
+                        self.player = Player(pos=(x_pos, y_pos), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites)
 
 
 
     def run(self):
+        self.visible_sprites.update()
         self.visible_sprites.draw(self.display_surface)
+
         self.obstacle_sprites.draw(self.display_surface)
-        debug(len(self.visible_sprites), len(self.obstacle_sprites))
+
+        debug(self.player.direction)
+        
