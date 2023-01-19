@@ -1,14 +1,16 @@
 import pygame
 from typing import Union
-from debug import debug
+
 
 class Player(pygame.sprite.Sprite):
-    def __init__(self, pos: Union[tuple[int, int], pygame.math.Vector2], groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]], obstacle_sprites: pygame.sprite.Group) -> None:
+    def __init__(self, pos: Union[tuple[int, int], pygame.math.Vector2],
+                 groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]],
+                 obstacle_sprites: pygame.sprite.Group) -> None:
         # Sprite setup
         super().__init__(groups)
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
-        
+
         # Collision attributes
         self.hitbox = self.rect.copy().inflate(0, -26)
         self.obstacle_sprites = obstacle_sprites
@@ -38,7 +40,7 @@ class Player(pygame.sprite.Sprite):
     def move(self, speed):
         if self.direction.magnitude() != 0:
             self.direction = self.direction.normalize()
-        
+
         self.hitbox.x += self.direction.x * speed
         self.collision('horizontal')
 
@@ -46,7 +48,6 @@ class Player(pygame.sprite.Sprite):
         self.collision('vertical')
 
         self.rect.center = self.hitbox.center
-
 
     def collision(self, direction):
         if direction == 'horizontal':

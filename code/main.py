@@ -1,18 +1,19 @@
-import pygame, sys
+import pygame
+import sys
 from settings import FPS, WIDTH, HEIGHT
 from level import Level
 
+
 class Game:
 	def __init__(self):
-		  
-		# general setup
+		# General setup
 		pygame.init()
-		self.screen = pygame.display.set_mode((WIDTH,HEIGHT))
+		self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
 		pygame.display.set_caption('Zelda - A Link to the PYst')
 		self.clock = pygame.time.Clock()
 
 		self.level = Level()
-	
+
 	def run(self):
 		while True:
 			for event in pygame.event.get():
@@ -23,8 +24,9 @@ class Game:
 			self.screen.fill('black')
 			self.level.run()
 			pygame.display.update()
-			
+
 			self.clock.tick(FPS)
+
 
 if __name__ == '__main__':
 	game = Game()
