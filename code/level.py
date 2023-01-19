@@ -1,7 +1,10 @@
+import random
+
 import pygame
-from settings import WORLD_MAP, TILESIZE
-from tile import Tile
 from player import Player
+from settings import TILESIZE
+from support import import_images_from_folder, import_layout_from_csv
+from tile import Tile
 
 
 class Level():
@@ -16,15 +19,32 @@ class Level():
         self.setup_map()
 
     def setup_map(self):
-        for row_index, row in enumerate(WORLD_MAP):
-            for col_index, cell in enumerate(row):
-                if cell:
-                    x_pos = col_index * TILESIZE
-                    y_pos = row_index * TILESIZE
-                    if cell == 'x':
-                        Tile((x_pos, y_pos), [self.visible_sprites, self.obstacle_sprites])
-                    if cell == 'p':
-                        self.player = Player(pos=(x_pos, y_pos), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites)
+        layouts = {
+            'boundary': import_layout_from_csv('../map/map_floorblocks.csv'),
+            'grass': import_layout_from_csv('../map/map_grass.csv'),
+            'object': import_layout_from_csv('../map/map_objects.csv'),
+        }
+        graphics = {
+            'grass': import_images_from_folder('../graphics/grass'),
+            'objects': import_images_from_folder('../graphics/objects')
+        }
+        print(graphics['objects'])
+
+        for style, layout in layouts.items():
+            for row_index, row in enumerate(layout):
+                for col_index, cell in enumerate(row):
+                    if cell != '-1':
+                        x = col_index * TILESIZE
+                        y = row_index * TILESIZE
+                        if style == 'boundary':
+                            Tile(pos=(x, y), groups=[self.obstacle_sprites], sprite_type='invisible')
+                        if style == 'grass':
+                            Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=random.choice(graphics['grass']), sprite_type='grass')
+                        if style == 'object':
+                            # pass
+                            Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=graphics['objects'][int(cell)], sprite_type='object')
+
+        self.player = Player(pos=(2000, 1430), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites)
 
     def run(self):
         self.visible_sprites.update()
