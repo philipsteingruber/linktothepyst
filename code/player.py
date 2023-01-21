@@ -1,5 +1,9 @@
-import pygame
 from typing import Union
+
+import pygame
+from debug import debug
+from support import import_images_from_folder
+from timer import Timer
 
 
 class Player(pygame.sprite.Sprite):
@@ -20,22 +24,61 @@ class Player(pygame.sprite.Sprite):
         self.default_speed = 5
         self.speed = self.default_speed
 
+        # Timers
+        self.timers = {
+            'attacking': Timer(400)
+        }
+
+        # Animations
+        self.animations = self.import_player_assets()
+        self.status = 'down'
+        self.frame_index = 0
+        self.animation_speed = 0.15
+        self.image = self.update_animation_frame()
+
+    def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
+        path = '../graphics/player/'
+
+        animations = {'up': [], 'down': [], 'left': [], 'right': [],
+                      'right_idle': [], 'left_idle': [], 'up_idle': [], 'down_idle': [],
+                      'right_attack': [], 'left_attack': [], 'up_attack': [], 'down_attack': []}
+        for animation in animations:
+            animations[animation] = import_images_from_folder(path + animation)
+        return animations
+
     def input(self):
         keys = pygame.key.get_pressed()
 
-        if keys[pygame.K_LEFT]:
-            self.direction.x = -1
-        elif keys[pygame.K_RIGHT]:
-            self.direction.x = 1
-        else:
-            self.direction.x = 0
+        if not self.timers['attacking'].active:
+            if keys[pygame.K_LEFT]:
+                self.direction.x = -1
+                self.status = 'left'
+            elif keys[pygame.K_RIGHT]:
+                self.direction.x = 1
+                self.status = 'right'
+            else:
+                self.direction.x = 0
 
-        if keys[pygame.K_UP]:
-            self.direction.y = -1
-        elif keys[pygame.K_DOWN]:
-            self.direction.y = 1
-        else:
-            self.direction.y = 0
+            if keys[pygame.K_UP]:
+                self.direction.y = -1
+                self.status = 'up'
+            elif keys[pygame.K_DOWN]:
+                self.direction.y = 1
+                self.status = 'down'
+            else:
+                self.direction.y = 0
+
+            if keys[pygame.K_SPACE]:
+                self.timers['attacking'].activate()
+
+            if keys[pygame.K_LCTRL]:
+                self.timers['attacking'].activate()
+
+    def set_status(self):
+        if self.direction.magnitude() == 0 and not self.timers['attacking'].active:
+            self.status = self.status.split('_')[0] + '_idle'
+        if self.timers['attacking'].active:
+            self.status = self.status.split('_')[0] + '_attack'
 
     def move(self, speed):
         if self.direction.magnitude() != 0:
@@ -48,6 +91,15 @@ class Player(pygame.sprite.Sprite):
         self.collision('vertical')
 
         self.rect.center = self.hitbox.center
+
+    def animate(self):
+        animation = self.animations[self.status]
+        self.frame_index = (self.frame_index + self.animation_speed) % len(animation)
+        self.image = self.update_animation_frame()
+        self.rect = self.image.get_rect(center=self.hitbox.center)
+
+    def update_animation_frame(self):
+        return self.animations[self.status][int(self.frame_index)]
 
     def collision(self, direction):
         if direction == 'horizontal':
@@ -66,5 +118,9 @@ class Player(pygame.sprite.Sprite):
                         self.hitbox.top = sprite.hitbox.bottom
 
     def update(self):
+        for timer in self.timers.values():
+            timer.update()
         self.input()
         self.move(self.speed)
+        self.set_status()
+        self.animate()

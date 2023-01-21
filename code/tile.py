@@ -1,5 +1,6 @@
-import pygame
 from typing import Union
+
+import pygame
 from settings import TILESIZE
 
 

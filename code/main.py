@@ -1,7 +1,8 @@
-import pygame
 import sys
-from settings import FPS, WIDTH, HEIGHT
+
+import pygame
 from level import Level
+from settings import FPS, HEIGHT, WIDTH
 
 
 class Game:

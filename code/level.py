@@ -1,6 +1,7 @@
 import random
 
 import pygame
+from debug import debug
 from player import Player
 from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
@@ -28,7 +29,6 @@ class Level():
             'grass': import_images_from_folder('../graphics/grass'),
             'objects': import_images_from_folder('../graphics/objects')
         }
-        print(graphics['objects'])
 
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
@@ -51,6 +51,7 @@ class Level():
         self.visible_sprites.calculate_offset(self.player)
         self.visible_sprites.draw_floor(self.player)
         self.visible_sprites.draw_sprites(self.player)
+        debug(self.player.status)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
