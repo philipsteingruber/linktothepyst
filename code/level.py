@@ -6,6 +6,7 @@ from player import Player
 from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
+from ui import UI
 from weapon import Weapon
 
 
@@ -19,6 +20,9 @@ class Level():
 
         self.player = None
         self.setup_map()
+
+        # UI
+        self.ui = UI()
 
     def setup_map(self):
         layouts = {
@@ -55,7 +59,7 @@ class Level():
         self.visible_sprites.calculate_offset(self.player)
         self.visible_sprites.draw_floor(self.player)
         self.visible_sprites.draw_sprites(self.player)
-        debug(self.player.equipped_weapon)
+        self.ui.display(self.player)
 
 
 class YSortCameraGroup(pygame.sprite.Group):

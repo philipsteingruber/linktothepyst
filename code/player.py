@@ -1,8 +1,7 @@
 from typing import Union, Callable
 
 import pygame
-from debug import debug
-from settings import weapon_data
+from settings import WEAPON_DATA
 from support import import_images_from_folder
 from timer import Timer
 
@@ -22,8 +21,6 @@ class Player(pygame.sprite.Sprite):
 
         # Movement attributes
         self.direction = pygame.math.Vector2(0, 0)
-        self.default_speed = 5
-        self.speed = self.default_speed
 
         # Timers
         self.timers = {
@@ -41,7 +38,14 @@ class Player(pygame.sprite.Sprite):
         # Weapon
         self.create_attack = create_attack
         self.weapon_index = 0
-        self.equipped_weapon = list(weapon_data.keys())[self.weapon_index]
+        self.equipped_weapon = list(WEAPON_DATA.keys())[self.weapon_index]
+
+        # Stats
+        self.max_stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
+        self.current_health = self.max_stats['health']
+        self.current_energy = self.max_stats['energy']
+        self.speed = self.max_stats['speed']
+        self.current_xp = 0
 
     def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
         path = '../graphics/player/'
@@ -84,9 +88,9 @@ class Player(pygame.sprite.Sprite):
 
             if keys[pygame.K_q] and not self.timers['switching_weapon'].active:
                 self.weapon_index += 1
-                if self.weapon_index >= len(weapon_data.keys()):
+                if self.weapon_index >= len(WEAPON_DATA.keys()):
                     self.weapon_index = 0
-                self.equipped_weapon = list(weapon_data.keys())[self.weapon_index]
+                self.equipped_weapon = list(WEAPON_DATA.keys())[self.weapon_index]
                 self.timers['switching_weapon'].activate()
 
     def set_status(self):
