@@ -1,7 +1,8 @@
-from typing import Union
+from typing import Union, Callable
 
 import pygame
 from debug import debug
+from settings import weapon_data
 from support import import_images_from_folder
 from timer import Timer
 
@@ -9,7 +10,7 @@ from timer import Timer
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos: Union[tuple[int, int], pygame.math.Vector2],
                  groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]],
-                 obstacle_sprites: pygame.sprite.Group) -> None:
+                 obstacle_sprites: pygame.sprite.Group, create_attack: Callable) -> None:
         # Sprite setup
         super().__init__(groups)
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
@@ -26,7 +27,8 @@ class Player(pygame.sprite.Sprite):
 
         # Timers
         self.timers = {
-            'attacking': Timer(400)
+            'attacking': Timer(400),
+            'switching_weapon': Timer(200),
         }
 
         # Animations
@@ -35,6 +37,11 @@ class Player(pygame.sprite.Sprite):
         self.frame_index = 0
         self.animation_speed = 0.15
         self.image = self.update_animation_frame()
+
+        # Weapon
+        self.create_attack = create_attack
+        self.weapon_index = 0
+        self.equipped_weapon = list(weapon_data.keys())[self.weapon_index]
 
     def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
         path = '../graphics/player/'
@@ -70,9 +77,17 @@ class Player(pygame.sprite.Sprite):
 
             if keys[pygame.K_SPACE]:
                 self.timers['attacking'].activate()
+                self.create_attack()
 
             if keys[pygame.K_LCTRL]:
                 self.timers['attacking'].activate()
+
+            if keys[pygame.K_q] and not self.timers['switching_weapon'].active:
+                self.weapon_index += 1
+                if self.weapon_index >= len(weapon_data.keys()):
+                    self.weapon_index = 0
+                self.equipped_weapon = list(weapon_data.keys())[self.weapon_index]
+                self.timers['switching_weapon'].activate()
 
     def set_status(self):
         if self.direction.magnitude() == 0 and not self.timers['attacking'].active:

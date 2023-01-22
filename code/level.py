@@ -6,6 +6,7 @@ from player import Player
 from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
+from weapon import Weapon
 
 
 class Level():
@@ -44,14 +45,17 @@ class Level():
                             # pass
                             Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=graphics['objects'][int(cell)], sprite_type='object')
 
-        self.player = Player(pos=(2000, 1430), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites)
+        self.player = Player(pos=(2000, 1430), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites, create_attack=self.create_attack)
+
+    def create_attack(self):
+        Weapon(player=self.player, groups=self.visible_sprites)
 
     def run(self):
         self.visible_sprites.update()
         self.visible_sprites.calculate_offset(self.player)
         self.visible_sprites.draw_floor(self.player)
         self.visible_sprites.draw_sprites(self.player)
-        debug(self.player.status)
+        debug(self.player.equipped_weapon)
 
 
 class YSortCameraGroup(pygame.sprite.Group):
