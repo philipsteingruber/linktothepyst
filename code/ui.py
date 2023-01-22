@@ -1,7 +1,7 @@
 import pygame
 from player import Player
-from settings import UI_FONT, UI_FONT_SIZE, HEALTH_BAR_WIDTH, BAR_HEIGHT, ENERGY_BAR_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT
-from settings import HEALTH_COLOR, ENERGY_COLOR, UI_BG_COLOR, UI_BORDER_COLOR, UI_BORDER_COLOR_ACTIVE, TEXT_COLOR, ITEM_BOX_SIZE, WEAPON_DATA
+from settings import UI_FONT, UI_FONT_SIZE, HEALTH_BAR_WIDTH, BAR_HEIGHT, ENERGY_BAR_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT, ITEM_BOX_SIZE
+from settings import HEALTH_COLOR, ENERGY_COLOR, UI_BG_COLOR, UI_BORDER_COLOR, UI_BORDER_COLOR_ACTIVE, TEXT_COLOR, WEAPON_DATA, MAGIC_DATA
 
 
 class UI:
@@ -18,6 +18,12 @@ class UI:
         for weapon in WEAPON_DATA.values():
             path = weapon['graphic']
             self.weapon_graphics.append(pygame.image.load(path).convert_alpha())
+
+        # Convert magic data
+        self.magic_graphics = []
+        for magic in MAGIC_DATA.values():
+            path = magic['graphic']
+            self.magic_graphics.append(pygame.image.load(path).convert_alpha())
 
     def show_bar(self, current_amount, max_amount, bg_rect, color):
         # Draw background
@@ -45,27 +51,34 @@ class UI:
         # Draw text
         self.display_surface.blit(text_surf, text_rect)
 
-    def get_and_draw_equipment_box(self, left: int, top: int, player: Player) -> pygame.Rect:
+    def get_and_draw_equipment_box(self, left: int, top: int, player: Player, equipment_type: str) -> pygame.Rect:
         bg_rect = pygame.Rect(left, top, ITEM_BOX_SIZE, ITEM_BOX_SIZE)
         pygame.draw.rect(self.display_surface, UI_BG_COLOR, bg_rect)
-        if player.timers['switching_weapon'].active:
+        if player.timers[f'switching_{equipment_type}'].active:
             pygame.draw.rect(self.display_surface, UI_BORDER_COLOR_ACTIVE, bg_rect, 3)
         else:
             pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
         return bg_rect
 
-    def weapon_overlay(self, left, top, player):
-        bg_rect = self.get_and_draw_equipment_box(left=left, top=top, player=player)
+    def display_weapon_overlay(self, left, top, player):
+        bg_rect = self.get_and_draw_equipment_box(left=left, top=top, player=player, equipment_type='weapon')
         weapon_surf = self.weapon_graphics[player.weapon_index]
         weapon_rect = weapon_surf.get_rect(center=bg_rect.center)
         self.display_surface.blit(weapon_surf, weapon_rect)
 
+    def display_magic_overlay(self, left, top, player):
+        bg_rect = self.get_and_draw_equipment_box(left=left, top=top, player=player, equipment_type='magic')
+        magic_surf = self.magic_graphics[player.magic_index]
+        magic_rect = magic_surf.get_rect(center=bg_rect.center)
+        self.display_surface.blit(magic_surf, magic_rect)
+
     def display(self, player: Player) -> None:
         # Health/energy bars
-        self.show_bar(player.current_health, player.max_stats['health'], self.health_bar_rect, HEALTH_COLOR)
-        self.show_bar(player.current_energy, player.max_stats['energy'], self.energy_bar_rect, ENERGY_COLOR)
+        self.show_bar(player.current_health, player.stats['health'], self.health_bar_rect, HEALTH_COLOR)
+        self.show_bar(player.current_energy, player.stats['energy'], self.energy_bar_rect, ENERGY_COLOR)
         self.show_xp(player.current_xp)
 
-        self.weapon_overlay(left=10, top=630, player=player)
+        self.display_weapon_overlay(left=10, top=630, player=player)
+        self.display_magic_overlay(left=95, top=630, player=player)
         # Magic overlay
         # self.selection_box(95, 630)

@@ -1,7 +1,7 @@
 from typing import Union, Callable
 
 import pygame
-from settings import WEAPON_DATA
+from settings import WEAPON_DATA, MAGIC_DATA
 from support import import_images_from_folder
 from timer import Timer
 
@@ -9,7 +9,8 @@ from timer import Timer
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos: Union[tuple[int, int], pygame.math.Vector2],
                  groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]],
-                 obstacle_sprites: pygame.sprite.Group, create_attack: Callable) -> None:
+                 obstacle_sprites: pygame.sprite.Group, create_attack: Callable,
+                 create_magic: Callable) -> None:
         # Sprite setup
         super().__init__(groups)
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
@@ -26,6 +27,7 @@ class Player(pygame.sprite.Sprite):
         self.timers = {
             'attacking': Timer(400),
             'switching_weapon': Timer(200),
+            'switching_magic': Timer(200),
         }
 
         # Animations
@@ -40,11 +42,16 @@ class Player(pygame.sprite.Sprite):
         self.weapon_index = 0
         self.equipped_weapon = list(WEAPON_DATA.keys())[self.weapon_index]
 
+        # Magic
+        self.create_magic = create_magic
+        self.magic_index = 0
+        self.equipped_magic = list(MAGIC_DATA.keys())[self.magic_index]
+
         # Stats
-        self.max_stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
-        self.current_health = self.max_stats['health']
-        self.current_energy = self.max_stats['energy']
-        self.speed = self.max_stats['speed']
+        self.stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
+        self.current_health = self.stats['health']
+        self.current_energy = self.stats['energy']
+        self.speed = self.stats['speed']
         self.current_xp = 0
 
     def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
@@ -85,6 +92,9 @@ class Player(pygame.sprite.Sprite):
 
             if keys[pygame.K_LCTRL]:
                 self.timers['attacking'].activate()
+                self.create_magic(magic_type=self.equipped_magic,
+                                  strength=MAGIC_DATA[self.equipped_magic]['strength'] + self.stats['magic'],
+                                  cost=MAGIC_DATA[self.equipped_magic]['cost'])
 
             if keys[pygame.K_q] and not self.timers['switching_weapon'].active:
                 self.weapon_index += 1
@@ -92,6 +102,13 @@ class Player(pygame.sprite.Sprite):
                     self.weapon_index = 0
                 self.equipped_weapon = list(WEAPON_DATA.keys())[self.weapon_index]
                 self.timers['switching_weapon'].activate()
+
+            if keys[pygame.K_w] and not self.timers['switching_magic'].active:
+                self.magic_index += 1
+                if self.magic_index >= len(MAGIC_DATA.keys()):
+                    self.magic_index = 0
+                self.equipped_magic = list(MAGIC_DATA.keys())[self.magic_index]
+                self.timers['switching_magic'].activate()
 
     def set_status(self):
         if self.direction.magnitude() == 0 and not self.timers['attacking'].active:

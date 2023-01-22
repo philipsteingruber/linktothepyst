@@ -19,12 +19,12 @@ class Level():
         self.obstacle_sprites = pygame.sprite.Group()
 
         self.player = None
-        self.setup_map()
+        self.setup_map_and_player()
 
         # UI
         self.ui = UI()
 
-    def setup_map(self):
+    def setup_map_and_player(self):
         layouts = {
             'boundary': import_layout_from_csv('../map/map_floorblocks.csv'),
             'grass': import_layout_from_csv('../map/map_grass.csv'),
@@ -49,10 +49,17 @@ class Level():
                             # pass
                             Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=graphics['objects'][int(cell)], sprite_type='object')
 
-        self.player = Player(pos=(2000, 1430), groups=self.visible_sprites, obstacle_sprites=self.obstacle_sprites, create_attack=self.create_attack)
+        self.player = Player(pos=(2000, 1430),
+                             groups=self.visible_sprites,
+                             obstacle_sprites=self.obstacle_sprites,
+                             create_attack=self.create_attack,
+                             create_magic=self.create_magic)
 
     def create_attack(self):
         Weapon(player=self.player, groups=self.visible_sprites)
+
+    def create_magic(self, magic_type, strength, cost):
+        print(f'Using magic: {magic_type} - {strength} - {cost}')
 
     def run(self):
         self.visible_sprites.update()
