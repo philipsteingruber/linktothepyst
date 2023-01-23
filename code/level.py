@@ -37,7 +37,6 @@ class Level():
             'objects': import_images_from_folder('../graphics/objects')
         }
 
-        num_of_raccoons = 0
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, cell in enumerate(row):
@@ -63,11 +62,7 @@ class Level():
                                 if cell == '391':
                                     enemy_type = 'spirit'
                                 if cell == '392':
-                                    if num_of_raccoons == 0:
-                                        enemy_type = 'raccoon'
-                                        num_of_raccoons += 1
-                                    else:
-                                        enemy_type = 'squid'
+                                    enemy_type = 'raccoon'
                                 if cell == '393':
                                     enemy_type = 'squid'
                                 Enemy(groups=self.visible_sprites, enemy_type=enemy_type, pos=(x, y), obstacle_sprites=self.obstacle_sprites)

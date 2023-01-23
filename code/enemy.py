@@ -71,10 +71,8 @@ class Enemy(Entity):
     def set_status(self, player: Player):
         distance = self.get_player_distance(player=player)
 
-        if distance <= self.attack_radius and self.can_attack:
+        if distance <= self.attack_radius and not self.attack_timer.active:
             if self.status != 'attack':
-                if self.enemy_type == 'raccoon':
-                    print('resetting frame index in set_status, status: ' + self.status)
                 self.frame_index = 0
             self.status = 'attack'
         elif distance <= self.notice_radius:
@@ -96,7 +94,6 @@ class Enemy(Entity):
         if self.frame_index >= len(self.animations[self.status]):
             self.frame_index = 0
             if self.status == 'attack':
-                self.can_attack = False
                 self.attack_timer.activate()
         self.image = self.animations[self.status][int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
@@ -108,7 +105,4 @@ class Enemy(Entity):
 
     def enemy_update(self, player: Player):
         self.set_status(player=player)
-        if self.enemy_type == 'raccoon':
-            pass
-            print(self.can_attack, int(self.frame_index), self.status)
         self.take_actions(player=player)
