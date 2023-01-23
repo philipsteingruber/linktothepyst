@@ -4,13 +4,15 @@ import pygame
 from settings import WEAPON_DATA, MAGIC_DATA
 from support import import_images_from_folder
 from timer import Timer
+from entity import Entity
 
 
-class Player(pygame.sprite.Sprite):
+class Player(Entity):
     def __init__(self, pos: Union[tuple[int, int], pygame.math.Vector2],
                  groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]],
                  obstacle_sprites: pygame.sprite.Group, create_attack: Callable,
                  create_magic: Callable) -> None:
+
         # Sprite setup
         super().__init__(groups)
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
@@ -19,9 +21,6 @@ class Player(pygame.sprite.Sprite):
         # Collision attributes
         self.hitbox = self.rect.copy().inflate(0, -26)
         self.obstacle_sprites = obstacle_sprites
-
-        # Movement attributes
-        self.direction = pygame.math.Vector2(0, 0)
 
         # Timers
         self.timers = {
@@ -33,8 +32,6 @@ class Player(pygame.sprite.Sprite):
         # Animations
         self.animations = self.import_player_assets()
         self.status = 'down'
-        self.frame_index = 0
-        self.animation_speed = 0.15
         self.image = self.update_animation_frame()
 
         # Weapon
@@ -116,18 +113,6 @@ class Player(pygame.sprite.Sprite):
         if self.timers['attacking'].active:
             self.status = self.status.split('_')[0] + '_attack'
 
-    def move(self, speed):
-        if self.direction.magnitude() != 0:
-            self.direction = self.direction.normalize()
-
-        self.hitbox.x += self.direction.x * speed
-        self.collision('horizontal')
-
-        self.hitbox.y += self.direction.y * speed
-        self.collision('vertical')
-
-        self.rect.center = self.hitbox.center
-
     def animate(self):
         animation = self.animations[self.status]
         self.frame_index = (self.frame_index + self.animation_speed) % len(animation)
@@ -136,22 +121,6 @@ class Player(pygame.sprite.Sprite):
 
     def update_animation_frame(self):
         return self.animations[self.status][int(self.frame_index)]
-
-    def collision(self, direction):
-        if direction == 'horizontal':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.x > 0:
-                        self.hitbox.right = sprite.hitbox.left
-                    if self.direction.x < 0:
-                        self.hitbox.left = sprite.hitbox.right
-        if direction == 'vertical':
-            for sprite in self.obstacle_sprites:
-                if sprite.hitbox.colliderect(self.hitbox):
-                    if self.direction.y > 0:
-                        self.hitbox.bottom = sprite.hitbox.top
-                    if self.direction.y < 0:
-                        self.hitbox.top = sprite.hitbox.bottom
 
     def update(self):
         for timer in self.timers.values():

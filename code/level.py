@@ -8,6 +8,7 @@ from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
 from weapon import Weapon
+from enemy import Enemy
 
 
 class Level():
@@ -29,12 +30,14 @@ class Level():
             'boundary': import_layout_from_csv('../map/map_floorblocks.csv'),
             'grass': import_layout_from_csv('../map/map_grass.csv'),
             'object': import_layout_from_csv('../map/map_objects.csv'),
+            'entities': import_layout_from_csv('../map/map_Entities.csv')
         }
         graphics = {
             'grass': import_images_from_folder('../graphics/grass'),
             'objects': import_images_from_folder('../graphics/objects')
         }
 
+        num_of_raccoons = 0
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, cell in enumerate(row):
@@ -46,14 +49,28 @@ class Level():
                         if style == 'grass':
                             Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=random.choice(graphics['grass']), sprite_type='grass')
                         if style == 'object':
-                            # pass
                             Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=graphics['objects'][int(cell)], sprite_type='object')
-
-        self.player = Player(pos=(2000, 1430),
-                             groups=self.visible_sprites,
-                             obstacle_sprites=self.obstacle_sprites,
-                             create_attack=self.create_attack,
-                             create_magic=self.create_magic)
+                        if style == 'entities':
+                            if cell == '394':
+                                self.player = Player(pos=(x, y),
+                                                     groups=self.visible_sprites,
+                                                     obstacle_sprites=self.obstacle_sprites,
+                                                     create_attack=self.create_attack,
+                                                     create_magic=self.create_magic)
+                            else:
+                                if cell == '390':
+                                    enemy_type = 'bamboo'
+                                if cell == '391':
+                                    enemy_type = 'spirit'
+                                if cell == '392':
+                                    if num_of_raccoons == 0:
+                                        enemy_type = 'raccoon'
+                                        num_of_raccoons += 1
+                                    else:
+                                        enemy_type = 'squid'
+                                if cell == '393':
+                                    enemy_type = 'squid'
+                                Enemy(groups=self.visible_sprites, enemy_type=enemy_type, pos=(x, y), obstacle_sprites=self.obstacle_sprites)
 
     def create_attack(self):
         Weapon(player=self.player, groups=self.visible_sprites)
@@ -62,10 +79,11 @@ class Level():
         print(f'Using magic: {magic_type} - {strength} - {cost}')
 
     def run(self):
-        self.visible_sprites.update()
         self.visible_sprites.calculate_offset(self.player)
         self.visible_sprites.draw_floor(self.player)
         self.visible_sprites.draw_sprites(self.player)
+        self.visible_sprites.update()
+        self.visible_sprites.update_enemies(self.player)
         self.ui.display(self.player)
 
 
@@ -96,3 +114,8 @@ class YSortCameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(), key=lambda s: s.rect.centery):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
+
+    def update_enemies(self, player: Player):
+        enemy_sprites = [sprite for sprite in self.sprites() if sprite.sprite_type == 'enemy']
+        for enemy in enemy_sprites:
+            enemy.enemy_update(player=player)
