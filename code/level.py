@@ -8,6 +8,8 @@ from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
 from weapon import Weapon
+from particles import ParticleAnimationPlayer
+from debug import debug
 
 
 class Level():
@@ -22,11 +24,15 @@ class Level():
         self.attack_sprites = pygame.sprite.Group()
         self.attackable_sprites = pygame.sprite.Group()
 
+        # Player and Map
         self.player = None
         self.setup_map_and_player()
 
         # UI
         self.ui = UI()
+
+        # Particles
+        self.particle_player = ParticleAnimationPlayer()
 
     def setup_map_and_player(self):
         layouts = {
@@ -77,7 +83,9 @@ class Level():
         print(f'Using magic: {magic_type} - {strength} - {cost}')
 
     def damage_player(self, amount: int, attack_type: str) -> None:
-        self.player.take_damage(amount)
+        if self.player.attackable:
+            self.player.take_damage(amount)
+            self.particle_player.create_particles(pos=self.player.rect.center, groups=[self.visible_sprites], particle_type=attack_type)
 
     def player_attack(self):
         if self.attack_sprites:
@@ -87,9 +95,16 @@ class Level():
                     for colliding_sprite in colliding_sprites:
                         sprite_type = colliding_sprite.sprite_type
                         if sprite_type == 'grass':
+                            offset = pygame.math.Vector2(0, 50)
+                            for _ in range(random.randint(3, 6)):
+                                self.particle_player.create_particles(pos=colliding_sprite.rect.center - offset, groups=[self.visible_sprites], particle_type='leaf')
                             colliding_sprite.kill()
                         if sprite_type == 'enemy':
-                            colliding_sprite.take_damage(player=self.player, attack_type=attack_sprite.sprite_type)
+                            enemy = colliding_sprite
+                            enemy.take_damage(player=self.player, attack_type=attack_sprite.sprite_type)
+                            if enemy.health <= 0:
+                                self.particle_player.create_particles(pos=enemy.rect.center, groups=[self.visible_sprites], particle_type=enemy.enemy_type)
+                                enemy.kill()
 
     def run(self):
         self.visible_sprites.calculate_offset(self.player)
@@ -99,6 +114,7 @@ class Level():
         self.visible_sprites.update_enemies(self.player)
         self.player_attack()
         self.ui.display(self.player)
+        debug(self.player.attackable)
 
 
 class YSortCameraGroup(pygame.sprite.Group):

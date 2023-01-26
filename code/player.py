@@ -53,13 +53,17 @@ class Player(Entity):
             'taken_damage': Timer(500)
         }
 
-    def get_full_weapon_damage(self):
+    def get_full_weapon_damage(self) -> None:
         return self.stats['attack'] + WEAPON_DATA[self.equipped_weapon]['damage']
 
-    def take_damage(self, amount):
+    def take_damage(self, amount: int) -> None:
         if not self.timers['taken_damage'].active:
             self.current_health -= amount
             self.timers['taken_damage'].activate()
+
+    @property
+    def attackable(self):
+        return not self.timers['taken_damage'].active
 
     def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
         path = '../graphics/player/'

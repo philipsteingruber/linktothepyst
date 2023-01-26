@@ -75,9 +75,6 @@ class Enemy(Entity):
                 pass
             self.damage_taken_timer.activate()
 
-            if self.health <= 0:
-                self.kill()
-
     def hit_reaction(self):
         if self.damage_taken_timer.active:
             self.direction *= -self.weight
