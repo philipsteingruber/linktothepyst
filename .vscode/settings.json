@@ -1,9 +1,0 @@
-{
-    "files.autoSave": "afterDelay",
-    "python.linting.flake8Enabled": true,
-    "python.linting.enabled": true,
-    "python.linting.flake8Args": [
-        "--max-line-length=180",
-        "--ignore=W191,F841",
-    ],
-}
