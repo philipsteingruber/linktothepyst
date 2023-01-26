@@ -41,7 +41,7 @@ class Player(Entity):
         # Stats
         self.stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
         self.current_health = self.stats['health']
-        self.current_energy = self.stats['energy']
+        self.current_energy = self.stats['energy'] / 2
         self.speed = self.stats['speed']
         self.current_xp = 0
 
@@ -53,8 +53,11 @@ class Player(Entity):
             'taken_damage': Timer(500)
         }
 
-    def get_full_weapon_damage(self) -> None:
+    def get_full_weapon_damage(self) -> int:
         return self.stats['attack'] + WEAPON_DATA[self.equipped_weapon]['damage']
+
+    def get_full_magic_damage(self) -> int:
+        return self.stats['magic'] + MAGIC_DATA[self.equipped_magic]['strength']
 
     def take_damage(self, amount: int) -> None:
         if not self.timers['taken_damage'].active:
@@ -142,6 +145,12 @@ class Player(Entity):
     def update_animation_frame(self):
         return self.animations[self.status][int(self.frame_index)]
 
+    def energy_recovery(self) -> None:
+        max_energy = self.stats['energy']
+        if self.current_energy < max_energy:
+            self.current_energy += self.stats['magic'] * 1 / 60
+            self.current_energy = min(self.current_energy, max_energy)
+
     def update(self):
         for timer in self.timers.values():
             if timer.active:
@@ -150,3 +159,4 @@ class Player(Entity):
         self.move(self.speed)
         self.set_status()
         self.animate()
+        self.energy_recovery()

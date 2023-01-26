@@ -67,12 +67,9 @@ class Enemy(Entity):
         else:
             return pygame.math.Vector2()
 
-    def take_damage(self, player: Player, attack_type: str) -> None:
+    def take_damage(self, attack_type: str, amount: int) -> None:
         if not self.damage_taken_timer.active:
-            if attack_type == 'weapon':
-                self.health -= player.get_full_weapon_damage()
-            if attack_type == 'magic':
-                pass
+            self.health -= amount
             self.damage_taken_timer.activate()
 
     def hit_reaction(self):

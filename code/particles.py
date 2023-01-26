@@ -49,7 +49,7 @@ class ParticleAnimationPlayer:
         return flipped_frames
 
     def create_particles(self, pos: tuple[int, int], groups: list[pygame.sprite.Group], particle_type: str) -> None:
-        if particle_type == 'grass':
+        if particle_type == 'leaf':
             animation_frames = random.choice(self.frames['leaf'])
         else:
             animation_frames = self.frames[particle_type]
