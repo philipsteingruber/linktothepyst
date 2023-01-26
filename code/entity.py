@@ -1,5 +1,7 @@
-import pygame
 from typing import Union
+
+import pygame
+import math
 
 
 class Entity(pygame.sprite.Sprite):
@@ -23,6 +25,14 @@ class Entity(pygame.sprite.Sprite):
         self.collision('vertical')
 
         self.rect.center = self.hitbox.center
+
+    def get_flicker_alpha(self) -> int:
+        value = math.sin(pygame.time.get_ticks())
+        return int(math.fabs(value) * 255)
+        if value >= 0:
+            return 255
+        else:
+            return 0
 
     def collision(self, direction):
         if direction == 'horizontal':

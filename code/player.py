@@ -1,10 +1,10 @@
-from typing import Union, Callable
+from typing import Callable, Union
 
 import pygame
-from settings import WEAPON_DATA, MAGIC_DATA
+from entity import Entity
+from settings import MAGIC_DATA, WEAPON_DATA
 from support import import_images_from_folder
 from timer import Timer
-from entity import Entity
 
 
 class Player(Entity):
@@ -17,17 +17,11 @@ class Player(Entity):
         super().__init__(groups)
         self.image = pygame.image.load('../graphics/test/player.png').convert_alpha()
         self.rect = self.image.get_rect(topleft=pos)
+        self.sprite_type = 'player'
 
         # Collision attributes
         self.hitbox = self.rect.copy().inflate(0, -26)
         self.obstacle_sprites = obstacle_sprites
-
-        # Timers
-        self.timers = {
-            'attacking': Timer(400),
-            'switching_weapon': Timer(200),
-            'switching_magic': Timer(200),
-        }
 
         # Animations
         self.animations = self.import_player_assets()
@@ -50,6 +44,22 @@ class Player(Entity):
         self.current_energy = self.stats['energy']
         self.speed = self.stats['speed']
         self.current_xp = 0
+
+        # Timers
+        self.timers = {
+            'attacking': Timer(400 + WEAPON_DATA[self.equipped_weapon]['cooldown']),
+            'switching_weapon': Timer(200),
+            'switching_magic': Timer(200),
+            'taken_damage': Timer(500)
+        }
+
+    def get_full_weapon_damage(self):
+        return self.stats['attack'] + WEAPON_DATA[self.equipped_weapon]['damage']
+
+    def take_damage(self, amount):
+        if not self.timers['taken_damage'].active:
+            self.current_health -= amount
+            self.timers['taken_damage'].activate()
 
     def import_player_assets(self) -> dict[str: list[pygame.Surface]]:
         path = '../graphics/player/'
@@ -98,6 +108,7 @@ class Player(Entity):
                 if self.weapon_index >= len(WEAPON_DATA.keys()):
                     self.weapon_index = 0
                 self.equipped_weapon = list(WEAPON_DATA.keys())[self.weapon_index]
+                self.timers['attacking'] = Timer(400 + WEAPON_DATA[self.equipped_weapon]['cooldown'])
                 self.timers['switching_weapon'].activate()
 
             if keys[pygame.K_w] and not self.timers['switching_magic'].active:
@@ -119,12 +130,18 @@ class Player(Entity):
         self.image = self.update_animation_frame()
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
+        if self.timers['taken_damage'].active:
+            self.image.set_alpha(self.get_flicker_alpha())
+        else:
+            self.image.set_alpha(255)
+
     def update_animation_frame(self):
         return self.animations[self.status][int(self.frame_index)]
 
     def update(self):
         for timer in self.timers.values():
-            timer.update()
+            if timer.active:
+                timer.update()
         self.input()
         self.move(self.speed)
         self.set_status()

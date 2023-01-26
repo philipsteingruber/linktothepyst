@@ -1,7 +1,8 @@
-import pygame
-from timer import Timer
 from typing import Union
+
+import pygame
 from player import Player
+from timer import Timer
 
 
 class Weapon(pygame.sprite.Sprite):
@@ -9,6 +10,8 @@ class Weapon(pygame.sprite.Sprite):
         super().__init__(groups)
         self.player = player
         self.direction = self.player.status.split('_')[0]
+
+        self.sprite_type = 'weapon'
 
         self.lifetime = Timer(400, self.kill)
         self.lifetime.activate()

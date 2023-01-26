@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 import pygame
 from level import Level
@@ -39,8 +39,8 @@ if __name__ == '__main__':
 				print(filename, linecount)
 				lines += linecount
 		except PermissionError:
-				pass
+			pass
 	print('Full Linecount:', lines)
-	
+
 	game = Game()
 	game.run()

@@ -1,15 +1,15 @@
+from typing import Union, Callable
+
 import pygame
 from entity import Entity
-from typing import Union
-from support import import_images_from_folder
-from settings import MONSTER_DATA
 from player import Player
+from settings import MONSTER_DATA
+from support import import_images_from_folder
 from timer import Timer
-from debug import debug
 
 
 class Enemy(Entity):
-    def __init__(self, groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]], enemy_type: str, pos: pygame.math.Vector2, obstacle_sprites: pygame.sprite.Group) -> None:
+    def __init__(self, groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]], enemy_type: str, pos: pygame.math.Vector2, obstacle_sprites: pygame.sprite.Group, damage_player: Callable) -> None:
         super().__init__(groups)
 
         # General Setup
@@ -41,6 +41,8 @@ class Enemy(Entity):
         self.timers = []
         self.can_attack = True
         self.attack_timer = Timer(400, self.allow_attack)
+        self.damage_taken_timer = Timer(400)
+        self.damage_player = damage_player
 
     def import_graphics(self, enemy_type: str) -> dict[str: list[pygame.Surface]]:
         animations = {'idle': [], 'move': [], 'attack': []}
@@ -65,10 +67,25 @@ class Enemy(Entity):
         else:
             return pygame.math.Vector2()
 
+    def take_damage(self, player: Player, attack_type: str) -> None:
+        if not self.damage_taken_timer.active:
+            if attack_type == 'weapon':
+                self.health -= player.get_full_weapon_damage()
+            if attack_type == 'magic':
+                pass
+            self.damage_taken_timer.activate()
+
+            if self.health <= 0:
+                self.kill()
+
+    def hit_reaction(self):
+        if self.damage_taken_timer.active:
+            self.direction *= -self.weight
+
     def allow_attack(self):
         self.can_attack = True
 
-    def set_status(self, player: Player):
+    def set_status(self, player: Player) -> None:
         distance = self.get_player_distance(player=player)
 
         if distance <= self.attack_radius and not self.attack_timer.active:
@@ -82,7 +99,7 @@ class Enemy(Entity):
 
     def take_actions(self, player: Player) -> None:
         if self.status == 'attack':
-            pass
+            self.damage_player(self.attack_damage, self.attack_type)
         if self.status == 'move':
             self.direction = self.get_player_direction(player=player)
         else:
@@ -98,10 +115,17 @@ class Enemy(Entity):
         self.image = self.animations[self.status][int(self.frame_index)]
         self.rect = self.image.get_rect(center=self.hitbox.center)
 
+        if self.damage_taken_timer.active:
+            self.image.set_alpha(self.get_flicker_alpha())
+        else:
+            self.image.set_alpha(255)
+
     def update(self) -> None:
+        self.hit_reaction()
         self.move(self.speed)
         self.animate()
         self.attack_timer.update()
+        self.damage_taken_timer.update()
 
     def enemy_update(self, player: Player):
         self.set_status(player=player)
