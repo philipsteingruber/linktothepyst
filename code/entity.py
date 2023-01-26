@@ -1,7 +1,7 @@
+import math
 from typing import Union
 
 import pygame
-import math
 
 
 class Entity(pygame.sprite.Sprite):

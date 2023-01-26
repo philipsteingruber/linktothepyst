@@ -1,6 +1,7 @@
 from typing import Callable, Union
 
 import pygame
+
 from entity import Entity
 from settings import MAGIC_DATA, WEAPON_DATA
 from support import import_images_from_folder

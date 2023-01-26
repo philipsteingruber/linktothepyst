@@ -1,15 +1,16 @@
 import random
 
 import pygame
+
 from enemy import Enemy
+from magic import MagicCaster
+from particles import ParticleAnimationPlayer
 from player import Player
 from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
 from weapon import Weapon
-from particles import ParticleAnimationPlayer
-from magic import MagicCaster
 
 
 class Level:

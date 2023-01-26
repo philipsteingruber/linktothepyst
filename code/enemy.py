@@ -1,6 +1,7 @@
 from typing import Union, Callable
 
 import pygame
+
 from entity import Entity
 from player import Player
 from settings import MONSTER_DATA

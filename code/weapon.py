@@ -1,6 +1,7 @@
 from typing import Union
 
 import pygame
+
 from player import Player
 from timer import Timer
 

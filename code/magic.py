@@ -1,7 +1,9 @@
+import random
+
 import pygame
+
 from player import Player
 from settings import TILESIZE
-import random
 
 
 class MagicCaster:

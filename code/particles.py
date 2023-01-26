@@ -1,7 +1,9 @@
-import pygame
-from support import import_images_from_folder
-from typing import Union
 import random
+from typing import Union
+
+import pygame
+
+from support import import_images_from_folder
 
 
 class ParticleAnimationPlayer:

@@ -2,6 +2,7 @@ import os
 import sys
 
 import pygame
+
 from level import Level
 from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
 
