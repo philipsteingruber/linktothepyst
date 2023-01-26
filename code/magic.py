@@ -18,7 +18,7 @@ class MagicCaster:
             self.animation_player.create_particles(pos=player.rect.center - pygame.math.Vector2(0, 60), groups=groups, particle_type='heal')
             self.animation_player.create_particles(pos=player.rect.center, groups=groups, particle_type='aura')
 
-    def flame(self, player: Player, strength: int, cost: int, groups: list[pygame.sprite.Group]):
+    def flame(self, player: Player, cost: int, groups: list[pygame.sprite.Group]):
         if player.current_energy >= cost:
             player.current_energy -= cost
 

@@ -9,7 +9,7 @@ from timer import Timer
 
 
 class Enemy(Entity):
-    def __init__(self, groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]], enemy_type: str, pos: pygame.math.Vector2, obstacle_sprites: pygame.sprite.Group, damage_player: Callable) -> None:
+    def __init__(self, groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]], enemy_type: str, pos: tuple[int, int], obstacle_sprites: pygame.sprite.Group, damage_player: Callable) -> None:
         super().__init__(groups)
 
         # General Setup
@@ -67,7 +67,7 @@ class Enemy(Entity):
         else:
             return pygame.math.Vector2()
 
-    def take_damage(self, attack_type: str, amount: int) -> None:
+    def take_damage(self, amount: int) -> None:
         if not self.damage_taken_timer.active:
             self.health -= amount
             self.damage_taken_timer.activate()

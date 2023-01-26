@@ -4,7 +4,7 @@ import os
 import pygame
 
 
-def import_layout_from_csv(path: str) -> list[str]:
+def import_layout_from_csv(path: str) -> list[list[str]]:
     map_list = []
     with open(path) as level_map:
         reader = csv.reader(level_map, delimiter=',')

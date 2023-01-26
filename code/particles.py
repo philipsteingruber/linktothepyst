@@ -42,7 +42,8 @@ class ParticleAnimationPlayer:
             )
         }
 
-    def flip_frames(self, frames: list[pygame.Surface]) -> pygame.Surface:
+    @staticmethod
+    def flip_frames(frames: list[pygame.Surface]) -> list[pygame.Surface]:
         flipped_frames = []
         for frame in frames:
             flipped_frames.append(pygame.transform.flip(surface=frame, flip_x=True, flip_y=False))

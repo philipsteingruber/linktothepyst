@@ -3,7 +3,7 @@ import random
 import pygame
 from enemy import Enemy
 from player import Player
-from settings import TILESIZE, MAGIC_DATA
+from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
@@ -12,7 +12,7 @@ from particles import ParticleAnimationPlayer
 from magic import MagicCaster
 
 
-class Level():
+class Level:
     def __init__(self) -> None:
         self.display_surface = pygame.display.get_surface()
 
@@ -67,6 +67,7 @@ class Level():
                                                      create_attack=self.create_attack,
                                                      create_magic=self.create_magic)
                             else:
+                                enemy_type = None
                                 if cell == '390':
                                     enemy_type = 'bamboo'
                                 if cell == '391':
@@ -85,7 +86,7 @@ class Level():
         if magic_type == 'heal':
             self.magic_player.heal(player=self.player, strength=strength, cost=cost, groups=[self.visible_sprites])
         if magic_type == 'flame':
-            self.magic_player.flame(player=self.player, strength=strength, cost=cost, groups=[self.visible_sprites, self.attack_sprites])
+            self.magic_player.flame(player=self.player, cost=cost, groups=[self.visible_sprites, self.attack_sprites])
 
     def damage_player(self, amount: int, attack_type: str) -> None:
         if self.player.attackable:
@@ -110,15 +111,15 @@ class Level():
                                 amount = self.player.get_full_weapon_damage()
                             else:
                                 amount = self.player.get_full_magic_damage()
-                            enemy.take_damage(attack_type=attack_sprite.sprite_type, amount=amount)
+                            enemy.take_damage(amount=amount)
                             if enemy.health <= 0:
                                 self.particle_player.create_particles(pos=enemy.rect.center, groups=[self.visible_sprites], particle_type=enemy.enemy_type)
                                 enemy.kill()
 
     def run(self):
         self.visible_sprites.calculate_offset(self.player)
-        self.visible_sprites.draw_floor(self.player)
-        self.visible_sprites.draw_sprites(self.player)
+        self.visible_sprites.draw_floor()
+        self.visible_sprites.draw_sprites()
         self.visible_sprites.update()
         self.visible_sprites.update_enemies(self.player)
         self.player_attack()
@@ -144,11 +145,11 @@ class YSortCameraGroup(pygame.sprite.Group):
         self.offset.x = player.rect.centerx - self.half_width
         self.offset.y = player.rect.centery - self.half_height
 
-    def draw_floor(self, player):
+    def draw_floor(self):
         offset_pos = self.floor_rect.topleft - self.offset
         self.display_surface.blit(self.floor_surface, offset_pos)
 
-    def draw_sprites(self, player):
+    def draw_sprites(self):
         for sprite in sorted(self.sprites(), key=lambda s: s.rect.centery):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)

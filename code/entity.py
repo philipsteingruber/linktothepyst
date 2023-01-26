@@ -8,6 +8,10 @@ class Entity(pygame.sprite.Sprite):
     def __init__(self, groups: Union[pygame.sprite.Group, list[pygame.sprite.Group]]) -> None:
         super().__init__(groups)
 
+        self.rect = None
+        self.hitbox = None
+        self.obstacle_sprites = None
+
         self.frame_index = 0
         self.animation_speed = 0.15
         self.direction = pygame.math.Vector2()
@@ -29,10 +33,6 @@ class Entity(pygame.sprite.Sprite):
     def get_flicker_alpha(self) -> int:
         value = math.sin(pygame.time.get_ticks())
         return int(math.fabs(value) * 255)
-        if value >= 0:
-            return 255
-        else:
-            return 0
 
     def collision(self, direction):
         if direction == 'horizontal':
