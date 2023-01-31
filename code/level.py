@@ -10,8 +10,8 @@ from settings import TILESIZE
 from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
-from weapon import Weapon
 from upgrade_menu import UpgradeMenu
+from weapon import Weapon
 
 
 class Level:
