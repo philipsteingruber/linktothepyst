@@ -11,6 +11,7 @@ from support import import_images_from_folder, import_layout_from_csv
 from tile import Tile
 from ui import UI
 from weapon import Weapon
+from upgrade_menu import UpgradeMenu
 
 
 class Level:
@@ -26,8 +27,11 @@ class Level:
         self.attackable_sprites = pygame.sprite.Group()
 
         # Player and Map
-        self.player = None
-        self.setup_map_and_player()
+        self.player = self.setup_map_and_return_player()
+
+        # Upgrade menu
+        self.game_paused = False
+        self.upgrade_menu = UpgradeMenu(self.player)
 
         # UI
         self.ui = UI()
@@ -36,7 +40,7 @@ class Level:
         self.particle_player = ParticleAnimationPlayer()
         self.magic_player = MagicCaster(self.particle_player)
 
-    def setup_map_and_player(self):
+    def setup_map_and_return_player(self) -> Player:
         layouts = {
             'boundary': import_layout_from_csv('../map/map_floorblocks.csv'),
             'grass': import_layout_from_csv('../map/map_grass.csv'),
@@ -48,6 +52,7 @@ class Level:
             'objects': import_images_from_folder('../graphics/objects')
         }
 
+        player = None
         for style, layout in layouts.items():
             for row_index, row in enumerate(layout):
                 for col_index, cell in enumerate(row):
@@ -62,11 +67,11 @@ class Level:
                             Tile(pos=(x, y), groups=[self.visible_sprites, self.obstacle_sprites], surface=graphics['objects'][int(cell)], sprite_type='object')
                         if style == 'entities':
                             if cell == '394':
-                                self.player = Player(pos=(x, y),
-                                                     groups=self.visible_sprites,
-                                                     obstacle_sprites=self.obstacle_sprites,
-                                                     create_attack=self.create_attack,
-                                                     create_magic=self.create_magic)
+                                player = Player(pos=(x, y),
+                                                groups=self.visible_sprites,
+                                                obstacle_sprites=self.obstacle_sprites,
+                                                create_attack=self.create_attack,
+                                                create_magic=self.create_magic)
                             else:
                                 enemy_type = None
                                 if cell == '390':
@@ -78,6 +83,7 @@ class Level:
                                 if cell == '393':
                                     enemy_type = 'squid'
                                 Enemy(groups=[self.visible_sprites, self.attackable_sprites], enemy_type=enemy_type, pos=(x, y), obstacle_sprites=self.obstacle_sprites, damage_player=self.damage_player)
+        return player
 
     def create_attack(self):
         Weapon(player=self.player, groups=[self.visible_sprites, self.attack_sprites])
@@ -115,16 +121,25 @@ class Level:
                             enemy.take_damage(amount=amount)
                             if enemy.health <= 0:
                                 self.particle_player.create_particles(pos=enemy.rect.center, groups=[self.visible_sprites], particle_type=enemy.enemy_type)
+                                self.player.current_xp += enemy.xp_value
+                                colliding_sprite.death_sound.play()
                                 enemy.kill()
 
+    def toggle_upgrade_menu(self):
+        self.game_paused = not self.game_paused
+
     def run(self):
-        self.visible_sprites.calculate_offset(self.player)
         self.visible_sprites.draw_floor()
         self.visible_sprites.draw_sprites()
-        self.visible_sprites.update()
-        self.visible_sprites.update_enemies(self.player)
-        self.player_attack()
         self.ui.display(self.player)
+
+        if self.game_paused:
+            self.upgrade_menu.display()
+        else:
+            self.visible_sprites.calculate_offset(self.player)
+            self.visible_sprites.update()
+            self.visible_sprites.update_enemies(self.player)
+            self.player_attack()
 
 
 class YSortCameraGroup(pygame.sprite.Group):

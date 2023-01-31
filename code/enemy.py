@@ -16,6 +16,11 @@ class Enemy(Entity):
         # General Setup
         self.enemy_type = enemy_type
         self.sprite_type = 'enemy'
+        enemy_info = MONSTER_DATA[self.enemy_type]
+        self.attack_sound = pygame.mixer.Sound(enemy_info['attack_sound'])
+        self.death_sound = pygame.mixer.Sound('../audio/death.wav')
+        self.attack_sound.set_volume(0.1)
+        self.death_sound.set_volume(0.1)
 
         # Graphics
         self.animations = self.import_graphics(enemy_type=self.enemy_type)
@@ -28,9 +33,8 @@ class Enemy(Entity):
         self.obstacle_sprites = obstacle_sprites
 
         # Stats
-        enemy_info = MONSTER_DATA[self.enemy_type]
         self.health = enemy_info['health']
-        self.exp = enemy_info['exp']
+        self.xp_value = enemy_info['xp']
         self.speed = enemy_info['speed']
         self.attack_damage = enemy_info['damage']
         self.weight = enemy_info['weight']
@@ -94,6 +98,7 @@ class Enemy(Entity):
 
     def take_actions(self, player: Player) -> None:
         if self.status == 'attack':
+            self.attack_sound.play()
             self.damage_player(self.attack_damage, self.attack_type)
         if self.status == 'move':
             self.direction = self.get_player_direction(player=player)

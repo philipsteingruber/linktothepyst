@@ -3,7 +3,7 @@ from typing import Callable, Union
 import pygame
 
 from entity import Entity
-from settings import MAGIC_DATA, WEAPON_DATA
+from settings import MAGIC_DATA, WEAPON_DATA, HITBOX_OFFSET
 from support import import_images_from_folder
 from timer import Timer
 
@@ -21,7 +21,7 @@ class Player(Entity):
         self.sprite_type = 'player'
 
         # Collision attributes
-        self.hitbox = self.rect.copy().inflate(0, -26)
+        self.hitbox = self.rect.copy().inflate(-6, HITBOX_OFFSET['player'])
         self.obstacle_sprites = obstacle_sprites
 
         # Animations
@@ -40,10 +40,11 @@ class Player(Entity):
         self.equipped_magic = list(MAGIC_DATA.keys())[self.magic_index]
 
         # Stats
-        self.stats = {'health': 100, 'energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
-        self.current_health = self.stats['health']
-        self.current_energy = self.stats['energy'] / 2
-        self.speed = self.stats['speed']
+        self.stats = {'max_health': 100, 'max_energy': 60, 'attack': 10, 'magic': 4, 'speed': 5}
+        self.max_stats = {'max_health': 300, 'max_energy': 140, 'attack': 20, 'magic': 10, 'speed': 10}
+        self.upgrade_cost = {'max_health': 100, 'max_energy': 100, 'attack': 100, 'magic': 100, 'speed': 100}
+        self.current_health = self.stats['max_health']
+        self.current_energy = self.stats['max_energy']
         self.current_xp = 0
 
         # Timers
@@ -53,6 +54,9 @@ class Player(Entity):
             'switching_magic': Timer(200),
             'taken_damage': Timer(500)
         }
+
+        self.attack_sound = pygame.mixer.Sound('../audio/sword.wav')
+        self.attack_sound.set_volume(0.05)
 
     def get_full_weapon_damage(self) -> int:
         return self.stats['attack'] + WEAPON_DATA[self.equipped_weapon]['damage']
@@ -104,6 +108,7 @@ class Player(Entity):
             if keys[pygame.K_SPACE]:
                 self.timers['attacking'].activate()
                 self.create_attack()
+                self.attack_sound.play()
 
             if keys[pygame.K_LCTRL]:
                 self.timers['attacking'].activate()
@@ -147,7 +152,7 @@ class Player(Entity):
         return self.animations[self.status][int(self.frame_index)]
 
     def energy_recovery(self) -> None:
-        max_energy = self.stats['energy']
+        max_energy = self.stats['max_energy']
         if self.current_energy < max_energy:
             self.current_energy += self.stats['magic'] * 1 / 60
             self.current_energy = min(self.current_energy, max_energy)
@@ -157,7 +162,7 @@ class Player(Entity):
             if timer.active:
                 timer.update()
         self.input()
-        self.move(self.speed)
+        self.move(self.stats['speed'])
         self.set_status()
         self.animate()
         self.energy_recovery()

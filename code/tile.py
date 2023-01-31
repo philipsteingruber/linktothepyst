@@ -2,7 +2,7 @@ from typing import Union
 
 import pygame
 
-from settings import TILESIZE
+from settings import TILESIZE, HITBOX_OFFSET
 
 
 class Tile(pygame.sprite.Sprite):
@@ -22,4 +22,4 @@ class Tile(pygame.sprite.Sprite):
         else:
             self.rect = self.image.get_rect(topleft=pos)
 
-        self.hitbox = self.rect.copy().inflate(0, -10)
+        self.hitbox = self.rect.copy().inflate(0, HITBOX_OFFSET[self.sprite_type])

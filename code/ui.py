@@ -1,8 +1,8 @@
 import pygame
 
 from player import Player
-from settings import HEALTH_COLOR, ENERGY_COLOR, UI_BG_COLOR, UI_BORDER_COLOR, UI_BORDER_COLOR_ACTIVE, TEXT_COLOR, WEAPON_DATA, MAGIC_DATA
-from settings import UI_FONT, UI_FONT_SIZE, HEALTH_BAR_WIDTH, BAR_HEIGHT, ENERGY_BAR_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT, ITEM_BOX_SIZE
+from settings import HEALTH_COLOR, ENERGY_COLOR, UI_BG_COLOR, UI_BORDER_COLOR, UI_BORDER_COLOR_ACTIVE, WEAPON_DATA, MAGIC_DATA
+from settings import UI_FONT, UI_FONT_SIZE, HEALTH_BAR_WIDTH, BAR_HEIGHT, ENERGY_BAR_WIDTH, SCREEN_WIDTH, ITEM_BOX_SIZE
 
 
 class UI:
@@ -39,8 +39,8 @@ class UI:
         pygame.draw.rect(self.display_surface, UI_BORDER_COLOR, bg_rect, 3)
 
     def show_xp(self, current_exp):
-        text_surf = self.font.render(f'EXPERIENCE - {current_exp}', False, TEXT_COLOR)
-        text_rect = text_surf.get_rect(bottomright=(SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20))
+        text_surf = self.font.render(f'EXPERIENCE - {int(current_exp)}', False, 'black')
+        text_rect = text_surf.get_rect(topright=(SCREEN_WIDTH - 20, 20))
 
         # Draw background
         bg_rect = text_rect.copy().inflate(20, 20)
@@ -75,8 +75,8 @@ class UI:
 
     def display(self, player: Player) -> None:
         # Health/energy bars
-        self.show_bar(player.current_health, player.stats['health'], self.health_bar_rect, HEALTH_COLOR)
-        self.show_bar(player.current_energy, player.stats['energy'], self.energy_bar_rect, ENERGY_COLOR)
+        self.show_bar(player.current_health, player.stats['max_health'], self.health_bar_rect, HEALTH_COLOR)
+        self.show_bar(player.current_energy, player.stats['max_energy'], self.energy_bar_rect, ENERGY_COLOR)
         self.show_xp(player.current_xp)
 
         self.display_weapon_overlay(left=10, top=630, player=player)

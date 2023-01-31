@@ -4,7 +4,7 @@ import sys
 import pygame
 
 from level import Level
-from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH
+from settings import FPS, SCREEN_HEIGHT, SCREEN_WIDTH, WATER_COLOR
 
 
 class Game:
@@ -17,14 +17,21 @@ class Game:
 
 		self.level = Level()
 
+		music = pygame.mixer.Sound('../audio/main.ogg')
+		music.set_volume(0.1)
+		music.play(loops=-1)
+
 	def run(self):
 		while True:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
 					sys.exit()
+				if event.type == pygame.KEYDOWN:
+					if event.key == pygame.K_c:
+						self.level.toggle_upgrade_menu()
 
-			self.screen.fill('black')
+			self.screen.fill(WATER_COLOR)
 			self.level.run()
 			pygame.display.update()
 
